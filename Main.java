@@ -10,11 +10,13 @@ public final class Main {
         var security = new SecurityAuditVisitor();
         var statistics = new ProjectStatisticsVisitor();
         var quality = new QualityGateVisitor();
+        var documentation = new DocumentationVisitor();
         var compliance = new ComplianceVisitor(Set.of("example.legacy:unsafe-transport"));
         project.accept(security);
         project.accept(statistics);
         project.accept(quality);
         project.accept(compliance);
+        project.accept(documentation);
 
         System.out.println("Project " + project.name());
         System.out.println("\nSecurity audit");
@@ -44,6 +46,13 @@ public final class Main {
         System.out.println("Violations: " + violations.size());
         for (var violation : violations) {
             System.out.printf("- %s %s: %s%n", violation.rule(), violation.location(), violation.detail());
+        }
+        var docs = documentation.report();
+        System.out.println("\nDocumentation");
+        System.out.printf(Locale.ROOT, "Documented source files: %d/%d (%.0f%%)%n",
+                docs.documentedSources(), docs.sourceFiles(), 100 * docs.coverage());
+        for (String name : docs.undocumentedSources()) {
+            System.out.println("- Missing documentation: " + name);
         }
     }
 
